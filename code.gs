@@ -20,16 +20,7 @@ function obterDadosNaPlanilha(idPlanilha, nomeGuia, intervaloCelulas) {
   var lista = sheet.getRange(intervaloCelulas[0], intervaloCelulas[1],
    total,
     intervaloCelulas[2]).getValues();
-  // verifica se existe objeto do tipo data e formata no padrão adquado
-//  for (i in lista) {
-//    for (c in lista[i]) {
-//      if (typeof lista[i][c] === "object") {
-//        var data = formatarDataDaPlanilha(lista[i][c]);
-//        lista[i][c] = data;
-//      }
-//    }
-//  }
-  
+ 
   return lista;
 };
 
@@ -87,33 +78,9 @@ function obterHoje(){
   //Logger.log(today);
   return today;
 }
-function obterPontoFormatado(){
-  var dados = obterDadosNaPlanilha(idPlanilha, "timesheet", [2, 2, 7]);
-  for (i in dados) {
-    var contador = 0;
-    for (c in dados[i]) {
-      if (typeof dados[i][c] === "object") {
-//        if(contador == 0){
-//          var data = formatarDataDaPlanilha(dados[i][c]);
-//          dados[i][c] = data;
-//        }
-      }
-      contador++;
-    }
-  }
-  return dados;
-}
 function obterHora(){
   var d = new Date(); // for now
-  var h = d.getHours(); // => 9
-  var m = d.getMinutes(); // =>  30
-  d.getSeconds();
-  
-  return h+":"+m;
-}
-function mostraTabelaPonto(){
-  var dados = obterPontoFormatado();
-  Logger.log(dados);
+  return ((d.getHours() < 10)?"0":"") + d.getHours() +":"+ ((d.getMinutes() < 10)?"0":"") + d.getMinutes() +":"+ ((d.getSeconds() < 10)?"0":"") + d.getSeconds();
 }
 function registrarPonto(){
   var dados = obterPontoFormatado();
@@ -147,7 +114,7 @@ function registraEntradaDoDia(){
 }
 function registraHoraEmPosicao(linha, posicao){
     incluirDadosEmColunasSeparadas(idPlanilha, "timesheet", linha,
-		[posicao], [new Date()]);
+		[posicao], [obterHora()]);
 }
 function calculaAlmoco(linha){
   incluirDadosEmColunasSeparadas(idPlanilha, "timesheet", linha,
