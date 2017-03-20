@@ -1,13 +1,11 @@
-  function doGet() {
+function doGet() {
     return HtmlService.createTemplateFromFile('index').evaluate().setSandboxMode(HtmlService.SandboxMode.IFRAME); 
-  }
-
-
-  function include(filename){
+}
+function include(filename){
     return HtmlService.createHtmlOutputFromFile(filename)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME).getContent();
-  }
-  var idPlanilha = "1ZsYLhznruW_S6N3rEdwwrc4HZLQFrcOxpWad5oP1nqo";
+}
+var idPlanilha = "1ZsYLhznruW_S6N3rEdwwrc4HZLQFrcOxpWad5oP1nqo";
 function obterDadosNaPlanilha(idPlanilha, nomeGuia, intervaloCelulas) {
   var sheet = SpreadsheetApp.openById(idPlanilha).getSheetByName(nomeGuia);
   var total =  sheet.getLastRow();
@@ -23,14 +21,12 @@ function obterDadosNaPlanilha(idPlanilha, nomeGuia, intervaloCelulas) {
  
   return lista;
 };
-
 function incluirDadosNaPlanilha(idPlanilha, nomeGuia, dados) {
 	var planilha = SpreadsheetApp.openById(idPlanilha);
 	var guia = planilha.getSheetByName(nomeGuia);
 	dados.unshift(guia.getLastRow()); // Incluir valor retornado pelo método
 	guia.appendRow(dados);
 };
-
 function incluirDadosEmColunasSeparadas(idPlanilha, nomeGuia, numeroLinha,
 		colunas, dados) {
 	var idLinha = parseInt(numeroLinha);
@@ -39,26 +35,8 @@ function incluirDadosEmColunasSeparadas(idPlanilha, nomeGuia, numeroLinha,
 				idLinha + 1, colunas[i]).setValue(dados[i]);
 	}
 };
-
 function obterEmail() {
 	return Session.getActiveUser().getEmail();
-};
-
-function formatarDataDaPlanilha(data) {
-	if (typeof (data) == "object") {
-		var data = new Date(data);
-		var dia = data.getDate();
-		var mes = data.getMonth() + 1;
-		var ano = data.getFullYear();
-		// acrescenta o zero ao dia
-		if (dia < 10)
-			dia = "0" + dia;
-		// acrescenta o zero ao mes
-		if (mes < 10)
-			mes = "0" + mes;
-		data = dia + "/" + mes + "/" + ano;
-	}
-	return data;
 };
 function obterHoje(){
   var today = new Date();
@@ -75,7 +53,6 @@ function obterHoje(){
   } 
   
   today = dd+'/'+mm+'/'+yyyy.toString().substr(2, 3);
-  //Logger.log(today);
   return today;
 }
 function obterHora(){
@@ -83,7 +60,7 @@ function obterHora(){
   return ((d.getHours() < 10)?"0":"") + d.getHours() +":"+ ((d.getMinutes() < 10)?"0":"") + d.getMinutes() +":"+ ((d.getSeconds() < 10)?"0":"") + d.getSeconds();
 }
 function registrarPonto(){
-  var dados = obterPontoFormatado();
+  var dados = obterDadosNaPlanilha(idPlanilha, "timesheet", [2, 2, 7]);
   Logger.log(dados);
   if(dados.length == 0){ //caso a planilha esteja vazia
     registraEntradaDoDia();
@@ -111,16 +88,26 @@ function registrarPonto(){
 }
 function registraEntradaDoDia(){
     incluirDadosNaPlanilha(idPlanilha, "timesheet", [obterHoje(), obterHora()]);
+    var sheet = SpreadsheetApp.openById(idPlanilha).getSheetByName("timesheet");
+    var linha =  sheet.getLastRow();
+    sheet.getRange(linha, [3]).setNumberFormat([['HH:mm']]);
 }
 function registraHoraEmPosicao(linha, posicao){
     incluirDadosEmColunasSeparadas(idPlanilha, "timesheet", linha,
 		[posicao], [obterHora()]);
+    SpreadsheetApp.openById(idPlanilha).getSheetByName("timesheet").getRange(
+				linha, [posicao]).setNumberFormat([['HH:mm']]);
+
 }
 function calculaAlmoco(linha){
   incluirDadosEmColunasSeparadas(idPlanilha, "timesheet", linha,
 		[7], ["=$E"+parseInt(linha+1)+"-$D"+parseInt(linha+1)+""]);
+  SpreadsheetApp.openById(idPlanilha).getSheetByName("timesheet").getRange(
+				linha, [7]).setNumberFormat([['HH:mm']]);
 }
 function calculaTotal(linha){
   incluirDadosEmColunasSeparadas(idPlanilha, "timesheet", linha,
 		[8], ["=($F"+parseInt(linha+1)+"-$E"+parseInt(linha+1)+")+($D"+parseInt(linha+1)+"-$C"+parseInt(linha+1)+")"]);
+  SpreadsheetApp.openById(idPlanilha).getSheetByName("timesheet").getRange(
+				linha, [8]).setNumberFormat([['HH:mm']]);
 }
